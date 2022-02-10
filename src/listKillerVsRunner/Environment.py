@@ -70,7 +70,6 @@ class Environment:
     - +20 killing oponent.
     - -2 if wrong fire. 
     - -10 wrong move (out of the map)
-    - -20 get killed
 
 
     ```
@@ -104,206 +103,165 @@ class Environment:
 
         self.desc = np.asarray(MAP, dtype="c")
 
-        self.num_agents = 2
+        self.num_states = 625
         self.num_rows = 5
         self.num_columns = 5
-        self.num_states = (self.num_rows*self.num_columns)**self.num_agents
         self.max_row = self.num_rows - 1
         self.max_col = self.num_columns - 1
         self.initial_state_distrib = np.zeros(self.num_states)
         self.num_actions = 8
         self.P = {
-            state: {
-            action: { 
-            agent: [] 
-            for agent in range(self.num_agents)} 
-            for action in range(self.num_actions)}
+            state: {action: [] for action in range(self.num_actions)}
             for state in range(self.num_states)
         }
 
-        
-        for state in range(self.num_states):
-            for agent in range(self.num_agents):
-                for action in range(self.num_actions):
-
-                    ags_row, ags_col = self.decode(state)
-                    n_ags_row = ags_row.copy()
-                    n_ags_col = ags_col.copy()
-                    # agent location: ags_row[agent], ags_col[agent]
-                    reward = -1
-                    done = False
+        # hard coded policy
+        for row_ag1 in range(self.num_rows):
+            for col_ag1 in range(self.num_columns):
+                for row_ag2 in range(self.num_rows):
+                    for col_ag2 in range(self.num_columns):
                         
-                    if action == 0:
-                        n_ags_row[agent] = min(ags_row[agent] + 1, self.max_row)
-                        if ags_row[agent] == self.max_row:
-                            reward = -10
-                    elif action == 1:
-                        n_ags_row[agent] = max(ags_row[agent] - 1, 0)
-                        if ags_row[agent] == 0:
-                            reward = -10
-                    elif action == 2:
-                        n_ags_col[agent] = min(ags_col[agent] + 1, self.max_col)
-                        if ags_col[agent] == self.max_col:
-                            reward = -10
-                    elif action == 3:
-                        n_ags_col[agent] = max(ags_col[agent] - 1, 0)
-                        if ags_col[agent] == 0:
-                            reward = -10
+                        state = self.encode(row_ag1, col_ag1, row_ag2, col_ag2)
+                        
+                        for action in range(self.num_actions):
+                            # defaults
+                            new_row_ag1, new_col_ag1, new_row_ag2, new_col_ag2 = row_ag1, col_ag1, row_ag2, col_ag2
+                            reward = -1  # default reward when there is no pickup/dropoff
+                            done = False
+                            ag1_localisation = (row_ag1, col_ag1)
+                            ag2_localisation = (row_ag2, col_ag2)
 
-                    elif action == 4:
-                        for opponent in range(self.num_agents):
-                            if opponent!=agent:
-                                if n_ags_col[agent]==n_ags_col[opponent] and n_ags_row[agent]<=n_ags_row[opponent]:
+                            if action == 0:
+                                new_row_ag1 = min(row_ag1 + 1, self.max_row)
+                                if row_ag1 == self.max_row:
+                                    reward = -10
+                            elif action == 1:
+                                new_row_ag1 = max(row_ag1 - 1, 0)
+                                if row_ag1 == 0:
+                                    reward = -10
+                            elif action == 2:
+                                new_col_ag1 = min(col_ag1 + 1, self.max_col)
+                                if col_ag1 == self.max_col:
+                                    reward = -10
+                            elif action == 3:
+                                new_col_ag1 = max(col_ag1 - 1, 0)
+                                if col_ag1 == 0:
+                                    reward = -10
+                            elif action == 4:  
+                                if new_col_ag1==new_col_ag2 and new_row_ag1<=new_row_ag2:
                                     done = True
                                     reward = 20
-                        if reward == -1:
-                            reward = -2
-                    elif action == 5: 
-                        for opponent in range(self.num_agents):
-                            if opponent!=agent:
-                                if n_ags_col[agent]==n_ags_col[opponent] and n_ags_row[agent]>=n_ags_row[opponent]:
+                                else:
+                                    reward = -2
+                            elif action == 5: 
+                                if new_col_ag1==new_col_ag2 and new_row_ag1>=new_row_ag2:
                                     done = True
                                     reward = 20
-                        if reward == -1:
-                            reward = -2
-                    elif action == 6:
-                        for opponent in range(self.num_agents):
-                            if opponent!=agent:
-                                if n_ags_col[agent]<=n_ags_col[opponent] and n_ags_row[agent]==n_ags_row[opponent]:
+                                else:
+                                    reward = -2
+                            elif action == 6:
+                                if new_col_ag1<=new_col_ag2 and new_row_ag1==new_row_ag2:
                                     done = True
                                     reward = 20
-                            if reward == -1:
-                                reward = -2
-                    elif action == 7: 
-                        for opponent in range(self.num_agents):
-                            if opponent!=agent:
-                                if n_ags_col[agent]>=n_ags_col[opponent] and n_ags_row[agent]==n_ags_row[opponent]:
+                                else:
+                                    reward = -2
+                            elif action == 7: 
+                                if new_col_ag1>=new_col_ag2 and new_row_ag1==new_row_ag2:
                                     done = True
                                     reward = 20
-                        if reward == -1:
-                            reward = -2
-                    new_state = self.encode(
-                        n_ags_row, n_ags_col
-                    )
-                    self.P[state][action][agent].append((1.0, new_state, reward, done))
+                                else:
+                                    reward = -2
+                            new_state = self.encode(
+                                new_row_ag1, new_col_ag1, new_row_ag2, new_col_ag2
+                            )
+                            self.P[state][action].append((1.0, new_state, reward, done))
 
         #self.initial_state_distrib /= self.initial_state_distrib.sum()
         self.action_space = spaces.Discrete(self.num_actions)
         self.observation_space = spaces.Discrete(self.num_states)
 
 
-    def encode(self, agents_row, agents_col):
+
+
+    def encode(self, agent1_row, agent1_col, agent2_row, agent2_col):
         # how to go from locations of agents to state value 
         # return encoded_data
-        # agents_row et agents_col are arrays of int of size self.num_agents
-        res = 0
-        if (len(agents_row)!=self.num_agents or len(agents_col)!=self.num_agents):
-            res = -1
-        else:
-            for i in range(self.num_agents):
-                res += agents_row[i]
-                res *= self.num_rows
-                res += agents_col[i]
-                res *= self.num_columns
-            res = res/self.num_columns
-        return res
+        i = agent1_row
+        i *= self.num_rows
+        i += agent1_col
+        i *= self.num_columns
+        i += agent2_row
+        i *= self.num_rows
+        i += agent2_col
+        return i
 
     def decode(self, i):
         # how to go from state value to locations of agents 
         # return decoded_data
-        agents_row = []
-        agents_col = []
-        for _ in range(self.num_agents):
-            agents_col.append(i % self.num_rows)
-            i = i // self.num_rows
-            agents_row.append(i % self.num_columns)
-            i = i // self.num_columns
-        i*=self.num_columns
-        assert 0 <= i < self.num_columns, "env.decode translation error"
-        assert len(agents_col)==self.num_agents, "env.decode error len(agents_col)"
-        assert len(agents_row)==self.num_agents, "env.decode error len(agents_row)"
-        agents_row = list(reversed(agents_row))
-        agents_col = list(reversed(agents_col))
-        return agents_row, agents_col
+        # value in [0, 625]
+        out = []
+        out.append(i % self.num_rows)
+        i = i // self.num_rows
+        out.append(i % self.num_columns)
+        i = i // self.num_columns
+        out.append(i % self.num_rows)
+        i = i // self.num_rows
+        out.append(i)
+        assert 0 <= i < 5
+        a1r, a1c, a2r, a2c = reversed(out)
+        return a1r, a1c, a2r, a2c
 
-    def step(self, actions):
-        # actions is the list of the actions to perform
-        # return (new state, rewards, dones, infos)
-        # for now it is agent1 then agent2 then ...
-        new_state = self.s
-        rewards = []
-        dones = []
-        infos = []
-        end = False
-        # moves first
-        for i in range(len(actions)):
-            if actions[i]>=4:
-                transitions = self.P[self.s][actions[i]][i]
-                p, s, r, d = transitions[0]
-                new_state = s
-                self.s = new_state
-                rewards.append(r)
-                dones.append(d)
-                if d == True:
-                    end = d
-                infos.append({"prob": p})
-        # shoot then
-        if not end:
-            for i in range(len(actions)):
-                if actions[i]<4:
-                    transitions = self.P[self.s][actions[i]][i]
-                    p, s, r, d = transitions[0]
-                    new_state = s
-                    self.s = new_state
-                    rewards.append(r)
-                    dones.append(d)
-                    infos.append({"prob": p})
-        else:
-            for i in range(len(actions)):
-                if actions[i]<4:
-                    p, s, r, d = "", self.s, -20, True
-                    new_state = self.s
-                    rewards.append(r)
-                    dones.append(d)
-                    infos.append({"prob": p})
-        self.s = new_state
-        self.lastaction = actions
-        return (int(self.s), rewards, dones, infos)
+    def step(self, action):
+        # ...
+        # return (new state, reward, done, info)
+        transitions = self.P[self.s][action]
+        # print(transitions)
+        # choose policy
+        # i = random_sample([t[0] for t in transitions], self.np_random)
+        p, s, r, d = transitions[0]
+        self.s = s
+        self.lastaction = action
+        return (int(s), r, d, {"prob": p})
 
     def reset(self):
         # return int(self.s)
         self.s = randrange(self.num_states)
         return self.s
 
-    def render(self, dones, ags_row, ags_col, actions):
-        table = [["" for _ in range(self.num_columns)] for _ in range(self.num_rows)]
-        for i in range(len(ags_col)):
-            table[ags_row[i]][ags_col[i]] += str(i) 
-        for j in range(len(actions)):
-            if actions[j] == 4: #if agent fire south
-                for i in range(self.num_rows):
-                    if i > ags_row[j]:
-                        table[i][ags_col[j]] += "."
-            if actions[j] == 5: #if agent 1 fire north
-                for i in range(self.num_rows):
-                    if i < ags_row[j]:
-                        table[i][ags_col[j]] += "."
-            if actions[j] == 6: #if agent 1 fire east
-                for i in range(self.num_columns):
-                    if i > ags_col[j]:
-                        table[ags_row[j]][i] += "."
-            if actions[j] == 7: #if agent 1 fire west 
-                for i in range(self.num_columns):
-                    if i < ags_col[j]:
-                        table[ags_row[j]][i] += "."
-            if dones[j]: #if agent is dead
-               table[ags_row[j]][ags_col[j]] = table[ags_row[j]][ags_col[j]].replace(str(j), "X")
+    def render(self, done, agent1_row, agent1_col, agent2_row, agent2_col, action=-1):
+        table = [[0 for _ in range(self.num_columns)] for _ in range(self.num_rows)]
+        table[agent1_row][agent1_col] = 1 
+        if action == 4: #if agent 1 fire south
+            for i in range(self.num_rows):
+                if i > agent1_row:
+                    table[i][agent1_col] = 3
+        if action == 5: #if agent 1 fire north
+            for i in range(self.num_rows):
+                if i < agent1_row:
+                    table[i][agent1_col] = 3
+        if action == 6: #if agent 1 fire east
+            for i in range(self.num_columns):
+                if i > agent1_col:
+                    table[agent1_row][i] = 3
+        if action == 7: #if agent 1 fire west 
+            for i in range(self.num_columns):
+                if i < agent1_col:
+                    table[agent1_row][i] = 3
+        if done: #if agent 2 is dead
+            table[agent2_row][agent2_col] = 8
+        else:
+            table[agent2_row][agent2_col] = 2
         result = "+---------+"
         for i in range(len(table)):
             result+="\n|"
             for j in range(len(table[i])):
-                if table[i][j]=="":
-                    table[i][j]=" "
-                result+=str(table[i][j])+"|"
+                if (table[i][j]==0):
+                    result+=" |"
+                elif (table[i][j]==3):
+                    result+=".|"
+                elif (table[i][j]==8):
+                    result+="X|"
+                else:
+                    result+=str(table[i][j])+"|"
         result += "\n+---------+\n\n\n"
         print(result)
