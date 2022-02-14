@@ -18,7 +18,11 @@ Save and execute this code (python masAlternativeVersion.py)
 #import src.killerVsRunner.Launch as launch
 #import src.listKillerVsRunner.Launch as launch
 #import src.listKillerVsKiller.Launch as launch
-import src.listThreeKillers.Launch as launch
+#import src.listThreeKillers.Launch as launch
+#import src.listWithOptions.Launch as launch
+import src.listWithOptionsOptimized.Launch as launch
+
+
 
 
 def launchEnv(use_existing, save_results):
