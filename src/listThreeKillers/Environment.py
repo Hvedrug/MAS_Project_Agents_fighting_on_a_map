@@ -333,8 +333,9 @@ class Environment:
                 for i in range(self.num_columns):
                     if i < ags_col[j]:
                         table[ags_row[j]][i] += "."
-            if self.isAgentDead[j] == True: #if agent is dead
-                table[ags_row[j]][ags_col[j]] = (table[ags_row[j]][ags_col[j]]).replace(str(j), "X").replace('.', '')
+        for k in range(len(actions)):
+            if self.isAgentDead[k] == True: #if agent is dead
+                table[ags_row[k]][ags_col[k]] = (table[ags_row[k]][ags_col[k]]).replace(str(k), "X").replace('.', '')
         lineToDraw = "+"+"-"*((self.num_columns*2)-1)+"+"
         result = lineToDraw
         for i in range(len(table)):
