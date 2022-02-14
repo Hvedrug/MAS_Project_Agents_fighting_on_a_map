@@ -1,7 +1,5 @@
 def menu():
-	num_agents = 2
-	num_dimensions = 2
-	simulation_name = "listThreeKillers"
+	simulation_name = "listWithOptionsOptimized"
 	use_existing = True
 	save_results = False
 
@@ -10,27 +8,21 @@ def menu():
 	if skipParam == "Y" or skipParam == "y":
 		pass
 	elif skipParam == "N" or skipParam == "n":
-		answer = input("Select the number corresponding to the simulation you want to make:\n1: killer vs dummy (only killer is an agent, 2D)\n2: killer vs runner (only killer is an agent, 2D)\n3: killer vs runner (both are agents, 2D)\n4: killer vs killer (2D)\n5: three killers (2D)\n")
+		answer = input("Select the number corresponding to the simulation you want to make:\n1: killer vs dummy (only killer is an agent, 2D)\n2: killer vs runner (only killer is an agent, 2D)\n3: killer vs runner (both are agents, 2D)\n4: killer vs killer (2D)\n5: three killers (2D)\n6: with Options (create your own in 2D)\n7: Optimized version (memory optimized version of 6:)\n")
 		if answer=='1':
-			num_dimensions = 2
-			num_agents = 2
 			simulation_name = "killerVsDummy"
 		elif answer=='2':
-			num_dimensions = 2
-			num_agents = 2
 			simulation_name = "killerVsRunner"
 		elif answer=='3':
-			num_dimensions = 2
-			num_agents = 2
 			simulation_name = "listKillerVsRunner"
 		elif answer=='4':
-			num_dimensions = 2
-			num_agents = 2
 			simulation_name = "listKillerVsKiller"
 		elif answer=='5':
-			num_dimensions = 2
-			num_agents = 2
 			simulation_name = "listThreeKillers"
+		elif answer=='6':
+			simulation_name = "listWithOptions"
+		elif answer=="7":
+			simulation_name = "listWithOptionsOptimized"
 		else:
 			print("wrong value selected")
 
@@ -54,6 +46,6 @@ def menu():
 		print("wrong value selected")
 
 	print("\nYou have selected : "+str(simulation_name)+", using trained agents:"+str(use_existing)+", saving results:"+str(save_results))
-	return num_agents, num_dimensions, use_existing, save_results, simulation_name
+	return use_existing, save_results, simulation_name
 
 	
