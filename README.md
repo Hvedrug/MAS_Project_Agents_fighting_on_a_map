@@ -6,4 +6,4 @@ open terminal in main folder
 run: python masMain.py
 
 if you have issues with some import in the code try to run this one instead:
-python masAlternativeVersion>py 
+python masAlternativeVersion.py 
