@@ -15,8 +15,7 @@ def launchEnv(use_existing, save_results):
 		launch.TrainingAndTestOne()
 
 
-
-num_agents, num_dimensions, use_existing, save_results, simulation_name = mn.menu()
+use_existing, save_results, simulation_name = mn.menu()
 
 if simulation_name == "killerVsDummy":
 	import src.killerVsDummy.Launch as launch
@@ -28,7 +27,11 @@ elif simulation_name == "listKillerVsKiller":
 	import src.listKillerVsKiller.Launch as launch
 elif simulation_name == "listThreeKillers":
 	import src.listThreeKillers.Launch as launch
+elif simulation_name == "listWithOptions":
+	import src.listWithOptions.Launch as launch
+elif simulation_name == "listWithOptionsOptimized":
+	import src.listWithOptionsOptimized.Launch as launch
 else:
-	import src.listThreeKillers.Launch as launch
+	import src.listWithOptionsOptimized.Launch as launch
 
 launchEnv(use_existing, save_results)
